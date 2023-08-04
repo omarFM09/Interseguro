@@ -1,0 +1,17 @@
+CREATE OR REPLACE PROCEDURE TASK2
+IS
+BEGIN
+	
+	UPDATE OUTREPORTE.Polizas_2 SET ESTADO_POLIZA = 'Desactivada por Impago' 
+	WHERE ID_POLIZA NOT IN (
+	SELECT po.ID_POLIZA  FROM OUTREPORTE.Polizas_2 po LEFT JOIN OUTREPORTE.Pagos_2 pa ON pa.ID_POLIZA = po.ID_POLIZA
+	WHERE extract(YEAR from pa.FECHA_PAGO) = (select extract(year from sysdate) from dual ) 
+	AND extract(MONTH from pa.FECHA_PAGO) = (select extract(month from sysdate) from dual ) and  pa.TOTAL_PAGO IS NOT null) ;
+
+
+
+	UPDATE OUTREPORTE.Polizas_2 SET ESTADO_POLIZA = 'Finalizada' 
+WHERE ID_POLIZA IN (SELECT ID_POLIZA FROM Polizas_2 WHERE FECHA_VENCIMIENTO < (SELECT SYSDATE FROM DUAL)  AND  ESTADO_POLIZA != 'Finalizada'  ) ;
+
+END TASK2;
+
