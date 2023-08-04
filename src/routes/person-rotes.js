@@ -54,59 +54,58 @@ router.get('/getSeguroCliente/:idseguro', async (req, res) => {
 //CREATE
 
 router.post('/addCliente', async (req, res) => {
-    const { ID_Cliente,  Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo } = req.body;
+    const { ID_Cliente, Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo } = req.body;
 
     //sql = "   insert into person(username,firstname,lastname) values (:username,:firstname,:lastname)";
-    sql = "INSERT INTO Clientes (ID_Cliente, Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo) VALUES (:ID_Cliente, :Nombre_Cliente, :Direccion, :Correo_Electronico, :Numero_Telefono,  TO_DATE(:Fecha_Nacimiento,'YYYY-MM-DD'), :Sexo)";
+    sql = `INSERT INTO OUTREPORTE.Clientes (ID_Cliente, Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo) VALUES ( :ID_Cliente, :Nombre_Cliente, :Direccion, :Correo_Electronico, :Numero_Telefono, TO_DATE(:Fecha_Nacimiento, 'YYYY-MM-DD'), :Sexo )`;
+    //sql = `INSERT INTO Clientes (ID_Cliente, Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo) VALUES (1, 'Juan Perez', 'Calle 123, Lima', 'juan.perez@example.com', '999888777', TO_DATE('1985-03-15','YYYY-MM-DD'), 'M');`;
+    try{
+        await BD.Open(sql, [ID_Cliente, Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo], true);
+    
+        res.status(200).json({
+            "msg": "Se registró nuevo cliente"
+            
+        })
 
-    await BD.Open(sql, [ID_Cliente,  Nombre_Cliente, Direccion, Correo_Electronico, Numero_Telefono, Fecha_Nacimiento, Sexo], true);
-
-    res.status(200).json({
-        "ID_Cliente": ID_Cliente,
-        "Nombre_Cliente": Nombre_Cliente,
-        "Direccion": Direccion,
-        "Correo_Electronico": Correo_Electronico,
-        "Numero_Telefono": Numero_Telefono,
-        "Fecha_Nacimiento": Fecha_Nacimiento,
-        "Sexo": Sexo
-    })
+    } catch (error) {
+        console.log(`ocurrió un error al registrar al cliente`);
+    }
 })
 
 router.post('/addPoliza', async (req, res) => {
     const { ID_Poliza,  ID_Cliente, ID_Seguro, Fecha_Inicio, Fecha_Vencimiento, Estado_Poliza } = req.body;
 
     //sql = "   insert into person(username,firstname,lastname) values (:username,:firstname,:lastname)";
-    sql = "INSERT INTO Polizas (ID_Poliza, ID_Cliente, ID_Seguro, Fecha_Inicio, Fecha_Vencimiento, Estado_Poliza)VALUES (:ID_Poliza, :ID_Cliente, :ID_Seguro, TO_DATE(:Fecha_Inicio,'YYYY-MM-DD'), TO_DATE(:Fecha_Vencimiento,'YYYY-MM-DD'), :Estado_Poliza)";
+    sql = `INSERT INTO OUTREPORTE.Polizas (ID_Poliza, ID_Cliente, ID_Seguro, Fecha_Inicio, Fecha_Vencimiento, Estado_Poliza)VALUES (:ID_Poliza, :ID_Cliente, :ID_Seguro, TO_DATE(:Fecha_Inicio,'YYYY-MM-DD'), TO_DATE(:Fecha_Vencimiento,'YYYY-MM-DD'), :Estado_Poliza)`;
+    try{
+        await BD.Open(sql, [ID_Poliza,  ID_Cliente, ID_Seguro, Fecha_Inicio, Fecha_Vencimiento, Estado_Poliza], true);
 
-    await BD.Open(sql, [ID_Poliza,  ID_Cliente, ID_Seguro, Fecha_Inicio, Fecha_Vencimiento, Estado_Poliza], true);
-
-    res.status(200).json({
-        "ID_Poliza": ID_Poliza,
-        "ID_Cliente": ID_Cliente,
-        "ID_Seguro": ID_Seguro,
-        "Fecha_Inicio": Fecha_Inicio,
-        "Fecha_Vencimiento": Fecha_Vencimiento,
-        "Estado_Poliza": Estado_Poliza
-    })
+        res.status(200).json({
+            "msg": "Se registró nueva poliza"
+            
+        })
+    } catch (error) {
+        console.log(`ocurrió un error al registrar la poliza`);
+    }
 })
 
 router.post('/addPago', async (req, res) => {
     const { ID_Pago, ID_Poliza, Fecha_Pago, Total_Pago, Moneda, ID_Detalle_Pago, Metodo_Pago } = req.body;
 
     //sql = "   insert into person(username,firstname,lastname) values (:username,:firstname,:lastname)";
-    sql = "INSERT INTO Pagos (ID_Pago, ID_Poliza, Fecha_Pago, Total_Pago, Moneda) VALUES (:ID_Pago, :ID_Poliza, TO_DATE(:Fecha_Pago,'YYYY-MM-DD'), :Total_Pago, :Moneda)";
-    sql1 = "INSERT INTO DetallePagos (ID_Detalle_Pago, ID_Pago, Monto_Pago_Detalle, Metodo_Pago, Moneda) VALUES (:ID_Detalle_Pago, :ID_Pago, :Total_Pago, :Metodo_Pago, :Moneda)";
+    sql = `INSERT INTO OUTREPORTE.Pagos (ID_Pago, ID_Poliza, Fecha_Pago, Total_Pago, Moneda) VALUES (:ID_Pago, :ID_Poliza, TO_DATE(:Fecha_Pago,'YYYY-MM-DD'), :Total_Pago, :Moneda)`;
+    sql1 = `INSERT INTO OUTREPORTE.DetallePagos (ID_Detalle_Pago, ID_Pago, Monto_Pago_Detalle, Metodo_Pago, Moneda) VALUES (:ID_Detalle_Pago, :ID_Pago, :Total_Pago, :Metodo_Pago, :Moneda)`;
+    try {
+        await BD.Open(sql, [ID_Pago, ID_Poliza, Fecha_Pago, Total_Pago, Moneda], true);
+        await BD.Open(sql1, [ID_Detalle_Pago,  ID_Pago, Total_Pago, Metodo_Pago, Moneda], true);
 
-    await BD.Open(sql, [ID_Pago, ID_Poliza, Fecha_Pago, Total_Pago, Moneda], true);
-    await BD.Open(sql1, [ID_Detalle_Pago,  ID_Pago, Total_Pago, Metodo_Pago, Moneda], true);
-
-    res.status(200).json({
-        "ID_Pago": ID_Pago,
-        "ID_Poliza": ID_Poliza,
-        "Fecha_Pago": Fecha_Pago,
-        "Total_Pago": Total_Pago,
-        "Moneda": Moneda
-    })
+        res.status(200).json({
+            "msg": "Se registró el pago y su detalle"
+            
+        })
+    } catch (error) {
+        console.log(`ocurrió un error al registrar el pago`);
+    }
 })
 
 module.exports = router;
