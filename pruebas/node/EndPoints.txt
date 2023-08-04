@@ -1,0 +1,31 @@
+1er EndPoint: http://localhost:8000/getSegurosCoberturas
+2do EndPoint: http://localhost:8000/getSeguroCliente/2
+3er EndPoint: http://localhost:8000/addCliente
+	{
+	      "ID_Cliente": "8",
+	      "Nombre_Cliente": "Nombre_Cliente",
+	      "Direccion": "Direccion",
+	      "Correo_Electronico": "Correo_Electronico@gmail.com",
+	      "Numero_Telefono": "999888444",
+	      "Fecha_Nacimiento": "1996-11-07",
+	      "Sexo": "M"
+	}
+4to EndPoint: http://localhost:8000/addPoliza
+	{
+	      "ID_Poliza": "4",
+	      "ID_Cliente": "8",
+	      "ID_Seguro": "2",
+	      "Fecha_Inicio": "2023-01-01",
+	      "Fecha_Vencimiento": "2023-02-01",
+	      "Estado_Poliza": "Activo"
+	}
+5to EndPoint: http://localhost:8000/addPago
+	{
+	      "ID_Pago": "5",
+	      "ID_Poliza": "4",
+	      "Fecha_Pago": "2023-01-01",
+	      "Total_Pago": "1500",
+	      "Moneda": "PEN",
+	      "ID_Detalle_Pago": "7",
+	      "Metodo_Pago": "Transferencia Bancaria"
+	}
