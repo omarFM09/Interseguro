@@ -1,0 +1,78 @@
+CREATE OR REPLACE PROCEDURE TASK3(p_moneda varchar2
+   , p_duracion varchar2, p_nombre_cliente varchar2, p_sexo varchar2, p_nombre_seguro varchar2, p_estado_poliza varchar2
+)
+IS
+	v_id_poliza VARCHAR2(400);
+    v_nombre_cliente VARCHAR2(400);
+    v_sexo VARCHAR2(1);
+    v_fecha_inicio DATE;
+    v_fecha_vencimiento DATE;
+    v_estado_poliza VARCHAR2(200);
+    v_nombre_cobertura VARCHAR2(400);
+    v_nombre_seguro VARCHAR2(200);
+    v_moneda VARCHAR2(10);
+    v_duracion VARCHAR2(30);
+    v_cnt_pago NUMBER;
+    v_sum_pago NUMBER;
+   
+	CURSOR datos_task3 IS 
+		SELECT p.ID_POLIZA,  c.nombre_cliente, c.sexo, p.fecha_inicio,p.fecha_vencimiento, p.estado_poliza, 
+			co.nombre_cobertura, s.nombre_seguro, pa.moneda, s.duracion, mp.cnt_pago, mp.sum_pago
+			FROM POLIZAS_2 p 
+			INNER join clientes_2 c ON c.id_cliente = p.id_cliente 
+			INNER JOIN SEGUROS_2 s ON s.id_seguro = p.id_seguro
+			INNER JOIN coberturas_2 co ON co.id_cobertura = s.id_cobertura
+			INNER JOIN pagos_2 pa ON pa.id_poliza = p.id_poliza
+			INNER JOIN ( SELECT pp.id_cliente, count(paa.id_pago) AS cnt_pago, sum(paa.total_pago) AS sum_pago  FROM pagos_2 paa INNER JOIN POLIZAS_2 pp ON pp.id_poliza = paa.id_poliza
+			GROUP BY pp.id_cliente) mp ON mp.id_cliente = c.id_cliente
+			WHERE p.ID_POLIZA > 0 
+		 	AND pa.moneda = COALESCE(p_moneda, pa.moneda)
+		 	AND s.duracion = COALESCE(p_duracion, s.duracion)
+          	AND c.nombre_cliente = COALESCE(p_nombre_cliente, c.nombre_cliente)
+          	AND c.sexo = COALESCE(p_sexo, c.sexo)
+          	AND s.nombre_seguro = COALESCE(p_nombre_seguro, s.nombre_seguro)
+         	AND p.estado_poliza = COALESCE(p_estado_poliza, p.estado_poliza);
+	
+  BEGIN
+	
+	OPEN datos_task3;
+	
+	LOOP 
+		
+		FETCH datos_task3 INTO
+		v_id_poliza,
+            v_nombre_cliente,
+            v_sexo,
+            v_fecha_inicio,
+            v_fecha_vencimiento,
+            v_estado_poliza,
+            v_nombre_cobertura,
+            v_nombre_seguro,
+            v_moneda,
+            v_duracion,
+            v_cnt_pago,
+            v_sum_pago;
+    
+      
+		EXIT WHEN datos_task3%NOTFOUND;
+		 v_id_poliza := TO_CHAR(v_id_poliza);
+        v_cnt_pago := TO_CHAR(v_cnt_pago);
+        v_sum_pago := TO_CHAR(v_sum_pago);
+       
+       
+
+       DBMS_OUTPUT.PUT_LINE('Id Poliza: ' || v_id_poliza || ', Cliente: ' || v_nombre_cliente || ', Sexo: ' || v_sexo || ', Fecha Inicio de Poliza: ' || v_fecha_inicio || ', Fecha Fin de Poliza: ' || v_fecha_vencimiento || ', Estado de Poliza: ' || v_estado_poliza || ', Nombre de Cobertura: ' || v_nombre_cobertura || ', Nombre Seguro: ' || v_nombre_seguro || ', Moneda de la Poliza: ' ||  v_moneda || ', Duracion de la Poliza: ' || v_duracion || ', Monto de la Poliza: ' || ', Cantidad total de pagos por poliza: ' || v_cnt_pago || ', Monto total de pagos por poliza: ' || v_sum_pago);
+	 
+	
+	END LOOP;
+	
+	CLOSE datos_task3;
+
+    EXCEPTION
+    WHEN OTHERS THEN
+        -- Manejo de excepciones
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+        CLOSE datos_task3; -- Asegurarse de cerrar el cursor en caso de error
+
+END;
+

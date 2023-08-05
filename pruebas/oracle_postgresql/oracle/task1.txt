@@ -1,0 +1,64 @@
+CREATE OR REPLACE PROCEDURE OUTREPORTE.TASK1 (fec_ini varchar2
+   , fec_fin varchar2
+)
+IS
+	dfec_ini varchar2(10) := fec_ini;
+    dfec_fin varchar2(10) := fec_fin;
+    v_fecha_pago DATE;
+    v_moneda VARCHAR2(10);
+    v_sv_total_pagos NUMBER;
+    v_sv_total_montos_pagos NUMBER;
+    v_sv_total_pagos_basico NUMBER;
+    v_sv_total_montos_pagos_basico NUMBER;
+    v_sv_total_pagos_terceros NUMBER;
+    v_sv_total_montos_pagos_t NUMBER;
+
+cursor tarea1 is	
+    SELECT p.fecha_pago, p.moneda, count(p.ID_Pago) AS SEGURO_VIDA_T, 
+	sum(p.Total_Pago) AS SEGURO_VIDA_TOTAL_MONTO_PAGO, count(s1.ID_Seguro) AS SEGURO_SALUD_BAS, 
+	sum(s1.Precio) AS SEGURO_SALUD_BASICO_MONTO_
+	,count(s3.ID_Seguro) AS SEGURO_AUTO_TERCEROS_C, sum(s3.Precio) AS SEGURO_AUTO_TERCEROS_MONT
+	FROM Pagos p INNER JOIN Polizas po ON po.ID_Poliza = p.ID_Poliza
+	left JOIN Seguros s1 ON s1.ID_Seguro = po.ID_Seguro AND s1.ID_Seguro = 1
+	left JOIN Seguros s3 ON s3.ID_Seguro = po.ID_Seguro AND s3.ID_Seguro = 3
+	WHERE p.fecha_pago BETWEEN TO_DATE( dfec_ini, 'YYYY-MM-DD') AND TO_DATE( dfec_fin, 'YYYY-MM-DD')
+	GROUP BY p.fecha_pago, p.moneda;
+
+BEGIN
+	
+	OPEN tarea1;
+		LOOP
+			FETCH tarea1 INTO
+				v_fecha_pago,
+			    v_moneda,
+			    v_sv_total_pagos,
+			    v_sv_total_montos_pagos,
+			    v_sv_total_pagos_basico,
+			    v_sv_total_montos_pagos_basico,
+			    v_sv_total_pagos_terceros,
+			    v_sv_total_montos_pagos_t;
+			   
+			   
+				EXIT WHEN tarea1%NOTFOUND;
+				 v_sv_total_pagos := TO_CHAR(v_sv_total_pagos);
+		         v_sv_total_montos_pagos := TO_CHAR(v_sv_total_montos_pagos);
+		         v_sv_total_pagos_basico := TO_CHAR(v_sv_total_pagos_basico);
+		         v_sv_total_montos_pagos_basico := TO_CHAR(v_sv_total_montos_pagos_basico);
+		         v_sv_total_pagos_terceros := TO_CHAR(v_sv_total_pagos_terceros);
+		         v_sv_total_montos_pagos_t := TO_CHAR(v_sv_total_montos_pagos_t);
+
+		        DBMS_OUTPUT.PUT_LINE('Fecha_pago' || v_fecha_pago || ', Moneda: ' || v_moneda || ', SEGURO_VIDA_TOTAL_CANTIDAD_PAGOS: ' || v_sv_total_pagos || ', SEGURO_VIDA_TOTAL_MONTO_PAGO: ' || v_sv_total_montos_pagos || ', SEGURO_SALUD_BASICO_CANTIDAD_PAGOS: ' || v_sv_total_pagos_basico || ', SEGURO_SALUD_BASICO_MONTO_PAGO: ' || v_sv_total_montos_pagos_basico || ', SEGURO_AUTO_TERCEROS_CANTIDAD_PAGOS: ' || v_sv_total_pagos_terceros || ', SEGURO_AUTO_TERCEROS_MONTO_PAGO: ' || v_sv_total_montos_pagos_t );
+	 
+		       	END LOOP; 
+		        
+			   
+	CLOSE tarea1;
+	 EXCEPTION
+    WHEN OTHERS THEN
+        -- Manejo de excepciones
+        DBMS_OUTPUT.PUT_LINE('Error: ' || SQLCODE || ' - ' || SQLERRM);
+        CLOSE tarea1; -- Asegurarse de cerrar el cursor en caso de error
+	
+END ;
+
+
