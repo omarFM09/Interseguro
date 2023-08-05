@@ -1,0 +1,3 @@
+SELECT task1('2023-01-01', '2023-08-08');
+SELECT task2();
+SELECT task3('PEN', '', '', '', '', '');

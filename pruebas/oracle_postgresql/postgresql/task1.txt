@@ -1,0 +1,41 @@
+CREATE OR REPLACE FUNCTION interseguro.task1(p_fec_ini date, p_fec_fin date)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    -- Declara las variables que necesites para almacenar los resultados
+    v_fecha_pago DATE;
+    v_moneda VARCHAR(10);
+    v_sv_total_pagos int4;
+    v_sv_total_montos_pagos decimal(10, 2);
+    v_sv_total_pagos_basico int4;
+    v_sv_total_montos_pagos_basico decimal(10, 2);
+    v_sv_total_pagos_terceros int4;
+    v_sv_total_montos_pagos_t decimal(10, 2);
+   	emp_task1 cursor for  SELECT p.fecha_pago, p.moneda, count(p.ID_Pago) AS SEGURO_VIDA_T, 
+		sum(p.Total_Pago) AS SEGURO_VIDA_TOTAL_MONTO_PAGO, count(s1.ID_Seguro) AS SEGURO_SALUD_BAS, 
+		sum(s1.Precio) AS SEGURO_SALUD_BASICO_MONTO_
+		,count(s3.ID_Seguro) AS SEGURO_AUTO_TERCEROS_C, sum(s3.Precio) AS SEGURO_AUTO_TERCEROS_MONT
+		FROM Pagos_2 p INNER JOIN Polizas_2 po ON po.ID_Poliza = p.ID_Poliza
+		left JOIN Seguros_2 s1 ON s1.ID_Seguro = po.ID_Seguro AND s1.ID_Seguro = 1
+		left JOIN Seguros_2 s3 ON s3.ID_Seguro = po.ID_Seguro AND s3.ID_Seguro = 3
+		WHERE p.fecha_pago BETWEEN  p_fec_ini AND p_fec_fin
+		GROUP BY p.fecha_pago, p.moneda;
+   
+   
+BEGIN
+    
+	open emp_task1;
+       
+    loop
+	    fetch emp_task1 into v_fecha_pago, v_moneda, v_sv_total_pagos, v_sv_total_montos_pagos, v_sv_total_pagos_basico, v_sv_total_montos_pagos_basico, v_sv_total_pagos_terceros, v_sv_total_montos_pagos_t;
+       
+		exit when not found;
+        -- Por ejemplo, puedes imprimir los valores
+        RAISE NOTICE 'Fecha_pago: %, Moneda: %, Seguro_vida_total_monto_pago: %, Seguro_vida_total_monto_pago: %, Seguro_salud_basico_cantidad_pagos: %, Seguro_salud_basico_monto_pago: %, Seguro_auto_terceros_cantidad_pagos: %, Seguro_auto_terceros_monto_pago: %', v_fecha_pago, v_moneda, v_sv_total_pagos, v_sv_total_montos_pagos, v_sv_total_pagos_basico, v_sv_total_montos_pagos_basico, v_sv_total_pagos_terceros, v_sv_total_montos_pagos_t;
+    END LOOP;
+   close emp_task1;
+END;
+$function$
+;
+
